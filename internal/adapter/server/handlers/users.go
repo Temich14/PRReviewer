@@ -18,16 +18,16 @@ func (h *UsersHandler) SetIsActive(c *gin.Context) {
 	var req dto.SetUserActiveRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error()})
 		return
 	}
 	user, err := h.userSrv.SetIsActive(c.Request.Context(), req.UserID, req.IsActive)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{Message: err.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
 		return
 	}
 

@@ -106,7 +106,7 @@ func (h *PullRequestHandler) GetReview(c *gin.Context) {
 			c.JSON(http.StatusNotFound, dto.ErrorResponse{Code: "NOT_FOUND", Message: err.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, prs)
