@@ -19,7 +19,9 @@ import (
 )
 
 type App struct {
+	cfg    *config.AppConfig
 	server *server.Server
+	db     *sql.DB
 	log    *slog.Logger
 }
 
@@ -49,7 +51,7 @@ func New(cfg *config.AppConfig) *App {
 
 	httpServer := server.NewServer(cfg.ServerCfg, teamHnd, userHnd, prHnd)
 
-	return &App{server: httpServer, log: logger}
+	return &App{server: httpServer, log: logger, db: db}
 }
 
 func (a *App) Run() {
@@ -61,12 +63,15 @@ func (a *App) Run() {
 
 	<-ctx.Done()
 
-	a.log.Info("Shutting down")
+	a.log.Info("shutting down")
 
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer shutdownCancel()
 	a.server.Stop(shutdownCtx)
-
+	err := a.db.Close()
+	if err != nil {
+		return
+	}
 	a.log.Info("shutdown complete")
 
 }
