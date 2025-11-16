@@ -49,7 +49,7 @@ func New(cfg *config.AppConfig) *App {
 
 	httpServer := server.NewServer(cfg.ServerCfg, teamHnd, userHnd, prHnd)
 
-	return &App{server: httpServer}
+	return &App{server: httpServer, log: logger}
 }
 
 func (a *App) Run() {
