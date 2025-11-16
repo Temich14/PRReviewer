@@ -3,6 +3,7 @@ package handlers
 import (
 	"PRReviewer/internal/core/dto"
 	"PRReviewer/internal/core/entities"
+	"PRReviewer/internal/core/enums"
 	"PRReviewer/internal/core/errs"
 	"context"
 	"errors"
@@ -52,7 +53,7 @@ func (h *PullRequestHandler) MergerPullRequest(c *gin.Context) {
 	pr, err := h.prSrv.MergePullRequest(c.Request.Context(), req.PullRequestID)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotFound) {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{Code: "NOT_FOUND", Message: err.Error()})
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{Code: enums.CodeNotFound, Message: err.Error()})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
@@ -71,23 +72,23 @@ func (h *PullRequestHandler) ReassignPullRequest(c *gin.Context) {
 	pr, err := h.prSrv.ReassignPullRequest(c.Request.Context(), req.PullRequestID, req.OldUserID)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotFound) {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{Code: "NOT_FOUND", Message: err.Error()})
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{Code: enums.CodeNotFound, Message: err.Error()})
 			return
 		}
 		if errors.Is(err, errs.ErrAlreadyMerged) {
-			c.JSON(http.StatusConflict, dto.ErrorResponse{Code: "PR_MERGED", Message: err.Error()})
+			c.JSON(http.StatusConflict, dto.ErrorResponse{Code: enums.CodeMerged, Message: err.Error()})
 			return
 		}
 		if errors.Is(err, errs.ErrNoReviewersAvailable) {
-			c.JSON(http.StatusConflict, dto.ErrorResponse{Code: "NO_CANDIDATE", Message: err.Error()})
+			c.JSON(http.StatusConflict, dto.ErrorResponse{Code: enums.CodeNoCandidate, Message: err.Error()})
 			return
 		}
 
 		if errors.Is(err, errs.ErrUserNotAssigned) {
-			c.JSON(http.StatusConflict, dto.ErrorResponse{Code: "NOT_ASSIGNED", Message: err.Error()})
+			c.JSON(http.StatusConflict, dto.ErrorResponse{Code: enums.CodeNotAssigned, Message: err.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, pr)
@@ -96,14 +97,14 @@ func (h *PullRequestHandler) ReassignPullRequest(c *gin.Context) {
 func (h *PullRequestHandler) GetReview(c *gin.Context) {
 	var req dto.UserIDQuery
 	if err := c.ShouldBindQuery(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error()})
 		return
 	}
 
 	prs, err := h.prSrv.GetUserReviewers(c.Request.Context(), req.UserID)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotFound) {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{Code: "NOT_FOUND", Message: err.Error()})
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{Code: enums.CodeNotFound, Message: err.Error()})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})

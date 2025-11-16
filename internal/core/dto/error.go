@@ -1,6 +1,8 @@
 package dto
 
+import "PRReviewer/internal/core/enums"
+
 type ErrorResponse struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
+	Code    enums.Code `json:"code"`
+	Message string     `json:"message"`
 }

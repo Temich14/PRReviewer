@@ -3,6 +3,7 @@ package repo
 import (
 	"PRReviewer/internal/core/dto"
 	"PRReviewer/internal/core/entities"
+	"PRReviewer/internal/core/enums"
 	"PRReviewer/internal/core/errs"
 	"context"
 	"fmt"
@@ -14,7 +15,7 @@ func (r *SQLRepo) CreatePR(ctx context.Context, pr dto.CreatePullRequest) error 
 
 	executor := getExecutor(ctx, r.db)
 
-	_, err := executor.ExecContext(ctx, query, pr.PullRequestID, pr.PullRequestName, pr.AuthorID, "OPENED")
+	_, err := executor.ExecContext(ctx, query, pr.PullRequestID, pr.PullRequestName, pr.AuthorID, enums.PRStatusOpened)
 	if err != nil {
 		return err
 	}
@@ -118,10 +119,10 @@ func (r *SQLRepo) GetPR(ctx context.Context, prID string) (*entities.PullRequest
 }
 
 func (r *SQLRepo) MergePullRequest(ctx context.Context, requestID string) error {
-	query := `UPDATE pull_requests SET status = 'MERGED' WHERE id = $1`
+	query := `UPDATE pull_requests SET status = $2 WHERE id = $1`
 
 	executor := getExecutor(ctx, r.db)
-	result, err := executor.ExecContext(ctx, query, requestID)
+	result, err := executor.ExecContext(ctx, query, requestID, enums.PRStatusMerged)
 	if err != nil {
 		return err
 	}

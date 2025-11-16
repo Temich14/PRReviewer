@@ -3,6 +3,7 @@ package handlers
 import (
 	"PRReviewer/internal/core/dto"
 	"PRReviewer/internal/core/entities"
+	"PRReviewer/internal/core/enums"
 	"PRReviewer/internal/core/errs"
 	"context"
 	"errors"
@@ -24,7 +25,7 @@ func (h *UsersHandler) SetIsActive(c *gin.Context) {
 	user, err := h.userSrv.SetIsActive(c.Request.Context(), req.UserID, req.IsActive)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotFound) {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{Message: err.Error()})
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{Code: enums.CodeNotFound, Message: err.Error()})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})

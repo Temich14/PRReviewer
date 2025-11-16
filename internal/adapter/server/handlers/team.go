@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"PRReviewer/internal/core/dto"
+	"PRReviewer/internal/core/enums"
 	"PRReviewer/internal/core/errs"
 	"context"
 	"errors"
@@ -25,7 +26,7 @@ func (h *TeamHandler) CreateTeam(c *gin.Context) {
 	team, err := h.teamSrv.CreateTeam(c.Request.Context(), &body)
 	if err != nil {
 		if errors.Is(err, errs.ErrAlreadyExists) {
-			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Code: "TEAM_EXISTS", Message: err.Error()})
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Code: enums.CodeTeamExists, Message: err.Error()})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
@@ -46,7 +47,7 @@ func (h *TeamHandler) GetTeam(c *gin.Context) {
 	team, err := h.teamSrv.GetTeamByName(c.Request.Context(), req.TeamName)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotFound) {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{Code: "NOT_FOUND", Message: err.Error()})
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{Code: enums.CodeNotFound, Message: err.Error()})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error()})
