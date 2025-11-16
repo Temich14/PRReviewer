@@ -30,31 +30,37 @@ func (s *TeamService) CreateTeam(ctx context.Context, team *dto.Team) (*dto.Team
 	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		exists, err := s.teamRepo.IsTeamExistsByName(ctx, team.TeamName)
 		if err != nil {
+			s.log.Error("не удалось проверить существует ли комманда", "error", err)
 			return err
 		}
 
 		if exists {
+			s.log.Error("команда не существует", "error", err)
 			return errs.ErrAlreadyExists
 		}
 
 		id, err := s.teamRepo.CreateTeam(ctx, team.TeamName)
 		if err != nil {
+			s.log.Error("не удалось создать команду", "error", err)
 			return err
 		}
 
 		err = s.UserRepo.AddUsers(ctx, team.Members)
 		if err != nil {
+			s.log.Error("не удалось добавить пользователя", "error", err)
 			return err
 		}
 
 		err = s.teamRepo.AddMembersToTeam(ctx, id, team.Members)
 		if err != nil {
+			s.log.Error("не удалось добавить пользователя в команду", "error", err)
 			return err
 		}
 
 		return nil
 	})
 	if err != nil {
+		s.log.Error("транзакция завершилась с ошибкой", "error", err)
 		return nil, err
 	}
 	return team, nil
@@ -63,6 +69,7 @@ func (s *TeamService) CreateTeam(ctx context.Context, team *dto.Team) (*dto.Team
 func (s *TeamService) GetTeamByName(ctx context.Context, teamName string) (*dto.Team, error) {
 	team, err := s.teamRepo.GetTeamByName(ctx, strings.TrimSpace(teamName))
 	if err != nil {
+		s.log.Error("не удалось получить команду по названию", "error", err)
 		return nil, err
 	}
 	return team, nil
